@@ -8,6 +8,7 @@ class AdminState(StatesGroup):
     raffles_description = State()
     raffles_end_date = State()
     raffles_photo = State()
+    raffles_requirements = State()
 
 class UserState(StatesGroup):
     user_actions = State()
