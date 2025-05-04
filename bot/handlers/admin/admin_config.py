@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import (
@@ -6,8 +6,13 @@ from aiogram.types import (
     Message
 )
 
-from ...utils.states import AdminState
-from ...keyboards.reply import admin_menu_keyboard
+from ...utils.states import AdminState, UserState
+from ...keyboards.reply import (admin_main_menu,
+                                user_menu_keyboard,
+                                raffles_menu,
+                                users_menu,
+                                settings_menu,
+                                stats_menu)
 
 admin_router = Router()
 
@@ -22,5 +27,37 @@ async def chek_admin(message: Message, state: FSMContext):
         await message.answer('У вас нет прав для использования данной команды!')
         return
     
-    await message.answer('Вы включили админ панель', reply_markup=admin_menu_keyboard)
+    await message.answer('Вы включили админ панель', reply_markup=admin_main_menu)
     await state.set_state(AdminState.admin_actions)
+
+
+@admin_router.message(F.text=='⬅️ Главное меню', AdminState.admin_actions)
+async def back_to_user_menu(message: Message, state: FSMContext):
+
+    await message.answer('Вы вышли из админ меню', reply_markup=user_menu_keyboard)
+    await state.set_state(UserState.user_actions)
+
+@admin_router.message(F.text=='🎁 Розыгрыши', AdminState.admin_actions)
+async def get_keyboard_raffiels(message: Message, state: FSMContext):
+
+    await message.answer('Вы вошли в раздел розыгрыши', reply_markup=raffles_menu)
+
+@admin_router.message(F.text=='👥 Пользователи', AdminState.admin_actions)
+async def get_keyboard_users(message: Message, state: FSMContext):
+
+    await message.answer('Вы вошли в раздел пользователи', reply_markup=users_menu)
+
+@admin_router.message(F.text=='📊 Статистика', AdminState.admin_actions)
+async def get_keyboard_static(message: Message, state: FSMContext):
+
+    await message.answer('Вы вошли в раздел статистики', reply_markup=stats_menu)
+
+@admin_router.message(F.text=='⚙️ Настройки', AdminState.admin_actions)
+async def get_keyboard_static(message: Message, state: FSMContext):
+
+    await message.answer('Вы вошли в раздел настройки', reply_markup=settings_menu)
+
+@admin_router.message(F.text=='⬅️ Назад', AdminState.admin_actions)
+async def get_back_menu(message: Message, state: FSMContext):
+
+    await message.answer('Вы вернулись в главное меню', reply_markup=admin_main_menu)
