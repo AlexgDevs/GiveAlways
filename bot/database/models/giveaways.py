@@ -14,11 +14,12 @@ class Giveaway(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(256))
-    description: Mapped[str] = mapped_column(String(896))
+    description: Mapped[str] = mapped_column(String(2000))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    end_date: Mapped[datetime] = mapped_column(DateTime)
+    photo: Mapped[str] = mapped_column(String(2000))
+    end_data: Mapped[datetime] = mapped_column(DateTime)
     
     creator_id: Mapped[int] = mapped_column(ForeignKey('users.id')) 
     creator: Mapped['User'] = relationship('User', back_populates='giveaways') # создатель
     
-    participants: Mapped[list['Participation']] = relationship('Participation', back_populates='giveaway') # Участие
+    participants: Mapped[list['Participation']] = relationship('Participation', back_populates='giveaway')

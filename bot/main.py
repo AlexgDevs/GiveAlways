@@ -10,13 +10,16 @@ from .database import (
     User,
     Giveaway,
     Session,
-    up
+    up,
+    drop
 )
 
 from .handlers import (
     user_router,
-    admin_router
+    admin_router,
 )
+
+from .handlers.admin.raffles import admin_router_raffles
 
 from .keyboards.reply import user_menu_keyboard
 
@@ -49,10 +52,13 @@ async def add_user_from_db(message: Message):
     
 async def main():
     bot = Bot(token=os.getenv('TOKEN'))
+    # drop()
+    up()
     
     dp.include_routers(
         user_router,
-        admin_router
+        admin_router,
+        admin_router_raffles
     )
     await dp.start_polling(bot)
 
