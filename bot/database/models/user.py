@@ -11,12 +11,12 @@ from .. import Base
 
 
 
-class User(Base):
+class User(Base): # Пользователь
     __tablename__ = 'users'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    joined: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    joined: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     
-    giveaways: Mapped[list['Giveaway']] = relationship('Giveaway', back_populates='creator')
-    participations: Mapped[list['Participation']] = relationship('Participation', back_populates='user')
+    giveaways: Mapped[list['Giveaway']] = relationship('Giveaway', back_populates='creator') # розыгрыши 
+    participations: Mapped[list['Participation']] = relationship('Participation', back_populates='user') # участия

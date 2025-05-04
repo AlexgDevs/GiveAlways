@@ -22,6 +22,10 @@ def up():
 def drop():
     Base.metadata.drop_all(engine)
 
+def migrate():
+    up()
+    drop()
+
 from .models import (
     Participation,
     User,

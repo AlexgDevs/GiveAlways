@@ -9,7 +9,7 @@ from sqlalchemy.orm import (
 
 from .. import Base 
 
-class Participation(Base):
+class Participation(Base): #Участие
     __tablename__ = 'participants'
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -17,5 +17,5 @@ class Participation(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     giveaway_id: Mapped[int] = mapped_column(ForeignKey('giveaways.id'))
     
-    user: Mapped['User'] = relationship('User', back_populates='participations')
-    giveaway: Mapped['Giveaway'] = relationship('Giveaway', back_populates='participants')
+    user: Mapped['User'] = relationship('User', back_populates='participations') # пользователи
+    giveaway: Mapped['Giveaway'] = relationship('Giveaway', back_populates='participants') # розыгрыши

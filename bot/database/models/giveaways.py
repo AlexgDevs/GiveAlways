@@ -18,7 +18,7 @@ class Giveaway(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     end_date: Mapped[datetime] = mapped_column(DateTime)
     
-    creator_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    creator: Mapped['User'] = relationship('User', back_populates='giveaways')
+    creator_id: Mapped[int] = mapped_column(ForeignKey('users.id')) 
+    creator: Mapped['User'] = relationship('User', back_populates='giveaways') # создатель
     
-    participants: Mapped[list['Participation']] = relationship('Participation', back_populates='giveaway')
+    participants: Mapped[list['Participation']] = relationship('Participation', back_populates='giveaway') # Участие
