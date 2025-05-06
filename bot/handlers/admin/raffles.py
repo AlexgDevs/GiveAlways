@@ -111,16 +111,15 @@ async def update_for_chanel(callback: CallbackQuery, state: FSMContext):
 async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
 
     requirements = message.text
-    if not requirements.startswith('@'):
-        await message.answer('Неверно!')
+    if requirements.startswith('@'):
+        await message.answer('Канал не может начинаться с @')
         return
     
-    await state.update_data(requirements=requirements)
+    requirements_username = requirements.split('/')[-1].replace('@', '').strip()
+    await state.update_data(requirements=requirements_username)
 
     try:
         
-
-
         user_id = message.from_user.id
         state_data = await state.get_data()
         end_data = state_data.get('end_data')
@@ -138,7 +137,7 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
                         description=description,
                         photo=photo,
                         end_data=end_data,
-                        requirements=requirements,
+                        requirements=requirements_username,
                         creator_id=user_id
                     )
 
@@ -179,7 +178,7 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
                 
 
     except ValueError:
-        await message.answer('Неверный формат даты. Пожалуйста используйте ДД.ММ.ГГГГ')
+        await message.answer('Неверный формат даты.')
         return
     except Exception as e:
         await message.answer(f'Произошла ошибка: {e}') 

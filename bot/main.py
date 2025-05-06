@@ -20,7 +20,7 @@ from .handlers import (
     admin_router,
     user_router,
     admin_router_raffles,
-    active_raffels_router
+    active_raffels_router,
 )
 
 
@@ -64,8 +64,10 @@ async def main():
     dp.include_routers(
         user_router,
         admin_router,
+
         admin_router_raffles,
-        active_raffels_router
+        active_raffels_router,
+
     )
     await dp.start_polling(bot)
 

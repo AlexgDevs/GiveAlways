@@ -9,7 +9,3 @@ builder.button(text="Готово", callback_data="req_done") # pass
 builder.adjust(1)
 condition_buttons = builder.as_markup()
 
-button_chek_condition = InlineKeyboardBuilder()
-button_chek_condition.button(text='Сделал', callback_data='check_condition')
-button_chek_condition.adjust(1)
-button_chek_condition = button_chek_condition.as_markup()
