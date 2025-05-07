@@ -29,7 +29,7 @@ async def get_list_raffels(message: Message, state: FSMContext, bot: Bot):
     try:
 
         with Session.begin() as session:
-            raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data > datetime.now())).all()
+            raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data > datetime.now(), Giveaway.is_finished==False)).all()
             
             if not raffels_ids:
                 await message.answer('Сейчас нет розыгрышей')
