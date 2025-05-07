@@ -10,5 +10,11 @@ class AdminState(StatesGroup):
     raffles_photo = State()
     raffles_requirements = State()
 
+class RaffelChangeState(StatesGroup):
+    raffel_action = State()
+    raffel_change_description = State()
+    raffel_change_photo = State()
+    raffel_change_end_data = State()
+
 class UserState(StatesGroup):
     user_actions = State()

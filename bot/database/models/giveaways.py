@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import JSON, ForeignKey, String, DateTime
+from sqlalchemy import JSON, Boolean, ForeignKey, String, DateTime
 
 from sqlalchemy.orm import (
     Mapped,
@@ -19,6 +19,8 @@ class Giveaway(Base):
     photo: Mapped[str] = mapped_column(String(2000))
     end_data: Mapped[datetime] = mapped_column(DateTime)
     requirements: Mapped[str]
+    user_total: Mapped[int] = mapped_column(default=0)
+    is_finished: Mapped[Boolean] = mapped_column(Boolean, default=False)
 
     creator_id: Mapped[int] = mapped_column(ForeignKey('users.id')) 
     creator: Mapped['User'] = relationship('User', back_populates='giveaways') # создатель

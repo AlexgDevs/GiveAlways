@@ -21,6 +21,7 @@ from .handlers import (
     user_router,
     admin_router_raffles,
     active_raffels_router,
+    finished_raffel_router
 )
 
 
@@ -67,8 +68,11 @@ async def main():
 
         admin_router_raffles,
         active_raffels_router,
-
+        finished_raffel_router
+        
     )
+
+
     await dp.start_polling(bot)
 
 

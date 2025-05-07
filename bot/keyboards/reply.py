@@ -2,7 +2,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # Главное меню админа
 admin_main_menu = ReplyKeyboardBuilder()
-admin_main_menu.button(text='🎁 Розыгрыши')
+admin_main_menu.button(text='🎁 Розыгрыши') 
 admin_main_menu.button(text='👥 Пользователи')
 admin_main_menu.button(text='📊 Статистика')
 admin_main_menu.button(text='⚙️ Настройки')
@@ -49,7 +49,7 @@ settings_menu = settings_menu.as_markup(resize_keyboard=True)
 
 ############################################
 user_menu_keyboard = ReplyKeyboardBuilder()
-user_menu_keyboard.button(text='🎯 Мое участие') 
+user_menu_keyboard.button(text='🎯 Мое участие') #.
 user_menu_keyboard.button(text='🎁 Активные розыгрыши') #.
 user_menu_keyboard.button(text='🏆 Мои победы')
 user_menu_keyboard.button(text='📜 Правила') #.

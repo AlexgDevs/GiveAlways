@@ -6,6 +6,7 @@ from sqlalchemy import select
 from aiogram import Bot, Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from aiogram.types import (
     message,
@@ -29,7 +30,7 @@ from ...database import (Session,
 
 
 
-from ...utils.states import AdminState
+from ...utils.states import AdminState, RaffelChangeState
 
 admin_router_raffles = Router()
 
@@ -99,7 +100,7 @@ async def progress_end_data(message: Message, state: FSMContext, bot: Bot):
 async def update_for_chanel(callback: CallbackQuery, state: FSMContext):
 
     await callback.answer()
-    await callback.message.edit_text('Введите канал.\n Пример: @chanel')
+    await callback.message.edit_text('Введите канал.\n Пример: https://t.me/TakeGunasf')
     await state.set_state(AdminState.raffles_requirements)
 
 # @admin_router_raffles.callback_query(F.data=='')
@@ -183,6 +184,174 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
     except Exception as e:
         await message.answer(f'Произошла ошибка: {e}') 
         return
+    
+
+
+@admin_router_raffles.message(F.text=='✏️ Изменить', AdminState.admin_actions)
+async def get_change_raffel_menu(message: Message, state: FSMContext):
+
+    dicret_menu = ReplyKeyboardBuilder()
+    for i in range(1, 5):
+        dicret_menu.button(text=f'{i}')
+    dicret_menu = dicret_menu.adjust(4).as_markup(resize_keyboard=True)
+
+    await message.answer('''
+1. Изменить фото
+2. Изменить описание
+3. Изменить дату розыгрыша
+4. Назад
+''', reply_markup=dicret_menu)
+    await state.set_state(RaffelChangeState.raffel_action)
+
+
+@admin_router_raffles.message(F.text.in_(str([1, 2, 3, 4])), RaffelChangeState.raffel_action)
+async def select_change(message: Message, state: FSMContext):
+
+    if message.text == '1':
+
+        with Session.begin() as session:
+            raffels_ids = session.scalars(select(Giveaway.id)).all()
+
+            if not raffels_ids:
+                await message.answer('Сейчас нет розыгрышей')
+                return
+            
+            for raffel_id in raffels_ids:
+                raffel = session.get(Giveaway, raffel_id)
+                raffels_menu = InlineKeyboardBuilder()
+                raffels_menu.button(text=f'{raffel.title}', callback_data=f'raffel_photo_id:{raffel_id}')
+            
+            raffels_menu = raffels_menu.adjust(3).as_markup()
+            await message.answer('Выберите для какого розыгрыша вы хотите изменить фото', reply_markup=raffels_menu)
+
+
+
+    elif message.text == '2':
+
+        with Session.begin() as session:
+            raffels_ids = session.scalars(select(Giveaway.id)).all()
+
+            if not raffels_ids:
+                await message.answer('Сейчас нет розыгрышей')
+                return
+            
+            for raffel_id in raffels_ids:
+                raffel = session.get(Giveaway, raffel_id)
+                raffels_menu = InlineKeyboardBuilder()
+                raffels_menu.button(text=f'{raffel.title}', callback_data=f'raffel_description_id:{raffel_id}')
+            
+            raffels_menu = raffels_menu.adjust(3).as_markup()
+            await message.answer('Выберите для какого розыгрыша вы хотите изменить описание', reply_markup=raffels_menu)
+
+    
+    elif message.text == '3':
+
+        with Session.begin() as session:
+            raffels_ids = session.scalars(select(Giveaway.id)).all()
+
+            if not raffels_ids:
+                await message.answer('Сейчас нет розыгрышей')
+                return
+            
+            for raffel_id in raffels_ids:
+                raffel = session.get(Giveaway, raffel_id)
+                raffels_menu = InlineKeyboardBuilder()
+                raffels_menu.button(text=f'{raffel.title}', callback_data=f'raffel_end_data_id:{raffel_id}')
+            
+            raffels_menu = raffels_menu.adjust(3).as_markup()
+            await message.answer('Выберите для какого розыгрыша вы хотите изменить окончание даты', reply_markup=raffels_menu)
+
+
+
+@admin_router_raffles.callback_query(F.data.startswith('raffel_photo_id:'))
+async def awaitng_change_description(callback: CallbackQuery, state: FSMContext):
+
+    await callback.answer()
+    raffel_id = callback.data.split(':')[1]
+    await state.update_data(raffel_id=raffel_id)
+    await callback.message.edit_text('Скиньте новое фото')
+    await state.set_state(RaffelChangeState.raffel_change_photo)
+
+
+@admin_router_raffles.message(F.photo, RaffelChangeState.raffel_change_photo)
+async def update_change(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    raffel_id = data.get('raffel_id')
+
+    with Session.begin() as session:
+        raffel = session.get(Giveaway, raffel_id)
+        raffel.photo = message.photo[-1].file_id
+        await message.answer('Измениения успешны!')
+        await state.clear()
+        return await get_change_raffel_menu(message, state)
+
+
+
+@admin_router_raffles.callback_query(F.data.startswith('raffel_description_id:'))
+async def awaitng_change_description(callback: CallbackQuery, state: FSMContext):
+
+    await callback.answer()
+    raffel_id = callback.data.split(':')[1]
+    await state.update_data(raffel_id=raffel_id)
+    await callback.message.edit_text('Введите новое описание')
+    await state.set_state(RaffelChangeState.raffel_change_description)
+
+
+@admin_router_raffles.message(F.text, RaffelChangeState.raffel_change_description)
+async def update_change(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    raffel_id = data.get('raffel_id')
+
+    with Session.begin() as session:
+        raffel = session.get(Giveaway, raffel_id)
+        raffel.description = message.text
+        await message.answer('Измениения успешны!')
+        await state.clear()
+        return await get_change_raffel_menu(message, state)
+    
+
+
+@admin_router_raffles.callback_query(F.data.startswith('raffel_end_data_id:'))
+async def awaitng_change_description(callback: CallbackQuery, state: FSMContext):
+
+    await callback.answer()
+    raffel_id = callback.data.split(':')[1]
+    await state.update_data(raffel_id=raffel_id)
+    await callback.message.edit_text('Нпишите конечную дату розыгрыша в формате ДД.ММ.ГГГГ')
+    await state.set_state(RaffelChangeState.raffel_change_end_data)
+
+
+@admin_router_raffles.message(F.text, RaffelChangeState.raffel_change_end_data)
+async def update_change(message: Message, state: FSMContext):
+
+    data = await state.get_data()
+    raffel_id = data.get('raffel_id')
+
+    end_data_str = message.text.strip()
+    date_format = "%d.%m.%Y"
+    end_data = datetime.strptime(end_data_str, date_format)
+
+    if end_data <= datetime.now():
+        await message.answer('Дата не может быть в прошлом!')
+        return
+
+    with Session.begin() as session:
+        raffel = session.get(Giveaway, raffel_id)
+        raffel.end_data = end_data
+        await message.answer('Измениения успешны!')
+        await state.clear()
+        return await get_change_raffel_menu(message, state)
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 
-from aiogram import exceptions
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import Bot, Router, F
 from aiogram.fsm.context import FSMContext
@@ -11,7 +10,6 @@ from aiogram.types import (
                     CallbackQuery,
                     callback_query
                     )
-import aiohttp
 from sqlalchemy import select
 
 from ...database import Session, Giveaway, User, Participation
@@ -32,6 +30,10 @@ async def get_list_raffels(message: Message, state: FSMContext, bot: Bot):
 
         with Session.begin() as session:
             raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data > datetime.now())).all()
+            
+            if not raffels_ids:
+                await message.answer('Сейчас нет розыгрышей')
+
             for raffel_id in raffels_ids:
                 raffel = session.get(Giveaway, raffel_id)
                 if raffel:
@@ -44,14 +46,14 @@ async def get_list_raffels(message: Message, state: FSMContext, bot: Bot):
                                 )
                     asyncio.sleep(0.3)
                 else:
-                    await message.answer('Сейчас нет розыгрышей!')
+                    await message.answer('Розыгрыш не найден!')
                     return
     
     except Exception as e:
         print(e)
         await message.answer('Не удалось посмотреть список розыгрышей')
         return
-    
+
 
 @active_raffels_router.callback_query(F.data.startswith('participate_action:'))
 async def chek_condition(callback: CallbackQuery):
@@ -111,6 +113,7 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
                 new_participation = Participation(user_id=user_id, giveaway_id=raffel.id)
                 session.add(new_participation)
+                raffel.user_total += 1
                 await callback.message.edit_text('Вы успешно участвуйте в розыгрыше!')
             
             else:
@@ -120,3 +123,36 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
     except Exception as e:
         await callback.message.answer('Не удалось принять участие')
         return
+    
+
+
+@active_raffels_router.message(F.text=='🎯 Мое участие', UserState.user_actions)
+async def get_list_participations(message: Message, state: FSMContext, bot: Bot):
+
+    user_id = message.from_user.id
+    with Session.begin() as session:
+        participations_ids = session.scalars(select(Participation.id).filter(Participation.user_id==user_id)).all()
+
+        if not participations_ids:
+            await message.answer('Вы нигде не участвуйте')
+            return
+
+        for participation_id in participations_ids:
+            participation = session.get(Participation, participation_id)
+
+            if participation:
+
+                raffel_id = participation.giveaway_id
+
+                raffel = session.get(Giveaway, raffel_id)
+                if raffel:
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=raffel.photo,
+                        caption=f'{raffel.title}\n\n{raffel.description}\n\nКоличество участников: {raffel.user_total}\n\nОкончание - {raffel.end_data}'
+                    )
+                else:
+                    await message.answer('Розыгрыш не найден')
+                    return
+            else:
+                await message.answer('Вы нигде не участвуйте')
