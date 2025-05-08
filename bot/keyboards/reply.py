@@ -13,9 +13,9 @@ admin_main_menu = admin_main_menu.as_markup(resize_keyboard=True)
 # Меню розыгрышей
 raffles_menu = ReplyKeyboardBuilder()
 raffles_menu.button(text='➕ Создать') #.
-raffles_menu.button(text='🛑 Завершить')
-raffles_menu.button(text='✏️ Изменить')
-raffles_menu.button(text='📋 Список')
+raffles_menu.button(text='🛑 Завершить') 
+raffles_menu.button(text='✏️ Изменить') #. 
+raffles_menu.button(text='📋 Список') 
 raffles_menu.button(text='⬅️ Назад') #.
 raffles_menu.adjust(2, 2, 1)
 raffles_menu = raffles_menu.as_markup(resize_keyboard=True)

@@ -67,10 +67,6 @@ async def check_time(bot: Bot):
 
 
 
-
-
-
-
 @dp.message(CommandStart())
 async def add_user_from_db(message: Message, state: FSMContext):
 
@@ -125,5 +121,4 @@ async def main():
 
 
     await dp.start_polling(bot)
-
 
