@@ -89,29 +89,34 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
     chanel_username = callback.data.split(':')[2]
     chanel_id = await get_channel_id(bot, chanel_username)
 
-    member = await bot.get_chat_member(
-        chat_id=chanel_id,
-        user_id=user_id
-    )
+    with Session.begin() as session:
+        
 
-    if member.status in ['left', 'kicked', 'banned']:
-        await callback.message.answer(f'Вы не выполнили все условия\nПодпишитесь на канал @{chanel_username} и нажмите кнопку участвовать')
-        return
+        existing = session.scalar(select(Participation).filter(Participation.user_id==user_id, Participation.giveaway_id==raffel_id))
 
-    try:
-        with Session.begin() as session:
+        if existing:
+            if existing.channel_checked:
+                await callback.message.answer('Вы уже участвуйте в розыгрыше!')
+                return
+
+        member = await bot.get_chat_member(
+            chat_id=chanel_id,
+            user_id=user_id
+        )
+
+        if member.status in ['left', 'kicked', 'banned']:
+            await callback.message.answer(f'Вы не выполнили все условия\nПодпишитесь на канал @{chanel_username} и нажмите кнопку участвовать')
+            return
+
+        try:
+        
 
             user = session.get(User, user_id)
             raffel = session.get(Giveaway, raffel_id)
-            participation = session.scalars(select(Participation).filter(user_id==user_id, raffel_id==raffel_id)).all()
-
-            if participation:
-                await callback.message.answer('Вы уже учавствуйте в данном розыгрыше!')
-                return
             
             if user and raffel:
 
-                new_participation = Participation(user_id=user_id, giveaway_id=raffel.id)
+                new_participation = Participation(user_id=user_id, giveaway_id=raffel.id, channel_checked=True)
                 session.add(new_participation)
                 raffel.user_total += 1
                 await callback.message.edit_text('Вы успешно участвуйте в розыгрыше!')
@@ -120,9 +125,9 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
                 await callback.message.answer('Пользователь или розыгрыш не найден')
                 return
             
-    except Exception as e:
-        await callback.message.answer('Не удалось принять участие')
-        return
+        except Exception as e:
+            await callback.message.answer('Не удалось принять участие')
+            return
     
 
 

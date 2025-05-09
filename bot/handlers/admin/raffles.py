@@ -22,13 +22,6 @@ from ...database import (Session,
                         User,
                         Giveaway)
 
-# raffles_menu.button(text='🛑 Завершить')
-# raffles_menu.button(text='✏️ Изменить')
-# raffles_menu.button(text='📋 Список')
-# raffles_menu.button(text='⬅️ Назад')
-
-
-
 
 from ...utils.states import AdminState, RaffelChangeState
 
@@ -91,6 +84,10 @@ async def progress_end_data(message: Message, state: FSMContext, bot: Bot):
         await message.answer(f'Дата окончания: {end_data}.')
         await message.answer('Выберите 1 условие', reply_markup=condition_buttons)
         await state.set_state(AdminState.raffles_requirements)
+
+    except ValueError:
+        await message.answer('Неверный формат даты.')
+        return
 
     except Exception as e:
         print(e)
@@ -178,9 +175,6 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
                 await state.set_state(AdminState.admin_actions)
                 
 
-    except ValueError:
-        await message.answer('Неверный формат даты.')
-        return
     except Exception as e:
         await message.answer(f'Произошла ошибка: {e}') 
         return
@@ -261,7 +255,11 @@ async def select_change(message: Message, state: FSMContext):
             raffels_menu = raffels_menu.adjust(3).as_markup()
             await message.answer('Выберите для какого розыгрыша вы хотите изменить окончание даты', reply_markup=raffels_menu)
 
+    elif message.text == '4':
+        await message.answer('Вы вернулись в админ меню', reply_markup=admin_main_menu)
 
+    else:
+        await message.answer('Нет такого ответа!')
 
 @admin_router_raffles.callback_query(F.data.startswith('raffel_photo_id:'))
 async def awaitng_change_description(callback: CallbackQuery, state: FSMContext):
@@ -344,6 +342,36 @@ async def update_change(message: Message, state: FSMContext):
         await state.clear()
         return await get_change_raffel_menu(message, state)
 
+
+
+
+
+
+
+@admin_router_raffles.message(F.text=='📋 Список', AdminState.admin_actions)
+async def get_list_active_raffels(message: Message, state: FSMContext, bot: Bot):
+
+    with Session.begin() as session:
+        raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data>datetime.now())).all()
+        user_id = message.from_user.id
+
+        if not raffels_ids:
+            await message.answer('Сейчас нет активных розыгрышей')
+            return
+        
+        total = 0
+
+        for raffel_id in raffels_ids:
+            total += 1
+
+            raffel = session.get(Giveaway, raffel_id)
+            await bot.send_photo(
+                chat_id=user_id,
+                photo=raffel.photo,
+                caption=f'{raffel.title}\n\n{raffel.description}\n\nСписок участников - {raffel.user_total}\n\nДата окончания - {raffel.end_data}'
+            )
+
+        await message.answer(f'Всего - {total} розыгрышей!')
 
 
 

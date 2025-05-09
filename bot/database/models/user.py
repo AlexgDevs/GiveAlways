@@ -18,5 +18,7 @@ class User(Base): # Пользователь
     name: Mapped[str]
     joined: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     
-    giveaways: Mapped[list['Giveaway']] = relationship('Giveaway', back_populates='creator') # розыгрыши 
+    giveaways: Mapped[list['Giveaway']] = relationship('Giveaway', back_populates='creator',  foreign_keys='Giveaway.creator_id') # розыгрыши 
     participations: Mapped[list['Participation']] = relationship('Participation', back_populates='user') # участия
+
+    won_giveaways: Mapped[list['Giveaway']] = relationship('Giveaway', back_populates='winner', foreign_keys='Giveaway.winner_id')

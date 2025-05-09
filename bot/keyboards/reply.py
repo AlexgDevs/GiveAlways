@@ -13,9 +13,9 @@ admin_main_menu = admin_main_menu.as_markup(resize_keyboard=True)
 # Меню розыгрышей
 raffles_menu = ReplyKeyboardBuilder()
 raffles_menu.button(text='➕ Создать') #.
-raffles_menu.button(text='🛑 Завершить') 
+raffles_menu.button(text='🛑 Завершить') #.
 raffles_menu.button(text='✏️ Изменить') #. 
-raffles_menu.button(text='📋 Список') 
+raffles_menu.button(text='📋 Список') #.
 raffles_menu.button(text='⬅️ Назад') #.
 raffles_menu.adjust(2, 2, 1)
 raffles_menu = raffles_menu.as_markup(resize_keyboard=True)
@@ -51,7 +51,7 @@ settings_menu = settings_menu.as_markup(resize_keyboard=True)
 user_menu_keyboard = ReplyKeyboardBuilder()
 user_menu_keyboard.button(text='🎯 Мое участие') #.
 user_menu_keyboard.button(text='🎁 Активные розыгрыши') #.
-user_menu_keyboard.button(text='🏆 Мои победы')
+user_menu_keyboard.button(text='🏆 Мои победы') #.
 user_menu_keyboard.button(text='📜 Правила') #.
 user_menu_keyboard.button(text='🛟 Поддержка')
 user_menu_keyboard.button(text='🔔 Уведомления')

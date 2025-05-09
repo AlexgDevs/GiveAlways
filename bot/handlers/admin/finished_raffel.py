@@ -70,6 +70,8 @@ async def get_winner_and_stop_raffel(callback: CallbackQuery, state: FSMContext,
 
         winner = session.get(User, winner_id)
         if winner and raffel:
+            
+            winner.won_giveaways.append(raffel)
 
             await bot.send_message(
                 chat_id=winner.id,
@@ -93,5 +95,6 @@ async def get_winner_and_stop_raffel(callback: CallbackQuery, state: FSMContext,
                 print(e)
                 failed += 1
 
+            print(f'Succsed - {succsed}\n Failed - {failed}')
 
             raffel.is_finished = True

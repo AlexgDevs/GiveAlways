@@ -17,5 +17,6 @@ class Participation(Base): #Участие
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     giveaway_id: Mapped[int] = mapped_column(ForeignKey('giveaways.id'))
     
+    channel_checked: Mapped[bool] = mapped_column(default=False)
     user: Mapped['User'] = relationship('User', back_populates='participations') # пользователи
     giveaway: Mapped['Giveaway'] = relationship('Giveaway', back_populates='participants') # розыгрыши

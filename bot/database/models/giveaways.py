@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from sqlalchemy import JSON, Boolean, ForeignKey, String, DateTime
 
 from sqlalchemy.orm import (
@@ -23,6 +24,8 @@ class Giveaway(Base):
     is_finished: Mapped[Boolean] = mapped_column(Boolean, default=False)
 
     creator_id: Mapped[int] = mapped_column(ForeignKey('users.id')) 
-    creator: Mapped['User'] = relationship('User', back_populates='giveaways') # создатель
-    
+    creator: Mapped['User'] = relationship('User', back_populates='giveaways', foreign_keys=[creator_id]) # создатель
     participants: Mapped[list['Participation']] = relationship('Participation', back_populates='giveaway')
+    
+    winner_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'))
+    winner: Mapped[Optional['User']] = relationship( 'User',  back_populates='won_giveaways', foreign_keys=[winner_id], uselist=False)

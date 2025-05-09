@@ -27,7 +27,8 @@ from .handlers import (
     user_router,
     admin_router_raffles,
     active_raffels_router,
-    finished_raffel_router
+    finished_raffel_router,
+    user_raffels
 )
 
 
@@ -44,6 +45,12 @@ async def select_winner(giveaway_id: int, bot: Bot):
 
     with Session.begin() as session:
         random_participation_users_id = session.scalars(select(Participation.user_id).filter(func.random(), Participation.giveaway_id==giveaway_id).limit(1)).all()
+
+        raffel = session.get(Giveaway, giveaway_id)
+        winner = session.get(User, random_participation_users_id)
+
+        winner.won_giveaways.append(raffel)
+
         await bot.send_message(
             chat_id=random_participation_users_id,
             text='Ты выиграл'
@@ -106,7 +113,7 @@ async def add_user_from_db(message: Message, state: FSMContext):
 
 async def main():
     bot = Bot(token=os.getenv('TOKEN'))
-    # drop()
+    drop()
     up()
     
     dp.include_routers(
@@ -115,6 +122,7 @@ async def main():
 
         admin_router_raffles,
         active_raffels_router,
+        user_raffels,
         finished_raffel_router
         
     )
