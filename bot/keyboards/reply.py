@@ -2,11 +2,11 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # Главное меню админа
 admin_main_menu = ReplyKeyboardBuilder()
-admin_main_menu.button(text='🎁 Розыгрыши') 
-admin_main_menu.button(text='👥 Пользователи')
+admin_main_menu.button(text='🎁 Розыгрыши') #.
+admin_main_menu.button(text='👥 Пользователи') #.
 admin_main_menu.button(text='📊 Статистика')
 admin_main_menu.button(text='⚙️ Настройки')
-admin_main_menu.button(text='⬅️ Главное меню')
+admin_main_menu.button(text='⬅️ Главное меню') #. 
 admin_main_menu.adjust(2, 2, 1)
 admin_main_menu = admin_main_menu.as_markup(resize_keyboard=True)
 
@@ -22,9 +22,9 @@ raffles_menu = raffles_menu.as_markup(resize_keyboard=True)
 
 # Меню пользователей
 users_menu = ReplyKeyboardBuilder()
-users_menu.button(text='⛔ Заблокировать')
-users_menu.button(text='✅ Разблокировать')
-users_menu.button(text='👀 Список')
+users_menu.button(text='⛔ Заблокировать') #. 
+users_menu.button(text='✅ Разблокировать') #.
+users_menu.button(text='👀 Список') #.
 users_menu.button(text='⬅️ Назад') #.
 users_menu.adjust(2, 2)
 users_menu = users_menu.as_markup(resize_keyboard=True)
@@ -43,7 +43,7 @@ settings_menu = ReplyKeyboardBuilder()
 settings_menu.button(text='📝 Условия') 
 settings_menu.button(text='📢 Рассылка')
 settings_menu.button(text='⚙️ Параметры')
-settings_menu.button(text='⬅️ Назад')
+settings_menu.button(text='⬅️ Назад') #.
 settings_menu.adjust(2, 2)
 settings_menu = settings_menu.as_markup(resize_keyboard=True)
 

@@ -28,7 +28,8 @@ from .handlers import (
     admin_router_raffles,
     active_raffels_router,
     finished_raffel_router,
-    user_raffels
+    user_raffels,
+    work_with_user
 )
 
 
@@ -123,7 +124,8 @@ async def main():
         admin_router_raffles,
         active_raffels_router,
         user_raffels,
-        finished_raffel_router
+        finished_raffel_router,
+        work_with_user
         
     )
 

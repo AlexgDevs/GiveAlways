@@ -27,12 +27,16 @@ from ...utils.states import AdminState, RaffelChangeState
 
 admin_router_raffles = Router()
 
+
+
 # created raffles
 @admin_router_raffles.message(F.text=='➕ Создать', AdminState.admin_actions)
 async def set_title(message: Message, state: FSMContext):
 
     await message.answer('Введите название предмета который вы разыгрываете', reply_markup=ReplyKeyboardRemove())
     await state.set_state(AdminState.raffles_title)
+
+
 
 @admin_router_raffles.message(F.text, AdminState.raffles_title)
 async def get_title_and_set_description(message: Message, state: FSMContext):
@@ -47,6 +51,7 @@ async def get_title_and_set_description(message: Message, state: FSMContext):
     await state.set_state(AdminState.raffles_description)
 
 
+
 @admin_router_raffles.message(F.text, AdminState.raffles_description)
 async def get_description_and_get_photo(message: Message, state: FSMContext):
     
@@ -59,6 +64,8 @@ async def get_description_and_get_photo(message: Message, state: FSMContext):
     await message.answer('Прикрепите фотографию предмета')
     await state.set_state(AdminState.raffles_photo)
 
+
+
 @admin_router_raffles.message(F.photo, AdminState.raffles_photo)
 async def get_photo_and_set_end_data(message: Message, state: FSMContext):
 
@@ -67,6 +74,7 @@ async def get_photo_and_set_end_data(message: Message, state: FSMContext):
 
     await message.answer('Нпишите конечную дату розыгрыша в формате ДД.ММ.ГГГГ')
     await state.set_state(AdminState.raffles_end_date)
+
 
 
 @admin_router_raffles.message(F.text, AdminState.raffles_end_date)
@@ -93,6 +101,7 @@ async def progress_end_data(message: Message, state: FSMContext, bot: Bot):
         print(e)
 
 
+
 @admin_router_raffles.callback_query(F.data=='req_subscribe', AdminState.raffles_requirements)
 async def update_for_chanel(callback: CallbackQuery, state: FSMContext):
 
@@ -100,9 +109,6 @@ async def update_for_chanel(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text('Введите канал.\n Пример: https://t.me/TakeGunasf')
     await state.set_state(AdminState.raffles_requirements)
 
-# @admin_router_raffles.callback_query(F.data=='')
-# @admin_router_raffles.callback_query(F.data=='')
-# @admin_router_raffles.callback_query(F.data=='')
 
 
 @admin_router_raffles.message(F.text, AdminState.raffles_requirements)
@@ -178,7 +184,7 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
     except Exception as e:
         await message.answer(f'Произошла ошибка: {e}') 
         return
-    
+
 
 
 @admin_router_raffles.message(F.text=='✏️ Изменить', AdminState.admin_actions)
@@ -196,6 +202,7 @@ async def get_change_raffel_menu(message: Message, state: FSMContext):
 4. Назад
 ''', reply_markup=dicret_menu)
     await state.set_state(RaffelChangeState.raffel_action)
+
 
 
 @admin_router_raffles.message(F.text.in_(str([1, 2, 3, 4])), RaffelChangeState.raffel_action)
@@ -261,6 +268,8 @@ async def select_change(message: Message, state: FSMContext):
     else:
         await message.answer('Нет такого ответа!')
 
+
+
 @admin_router_raffles.callback_query(F.data.startswith('raffel_photo_id:'))
 async def awaitng_change_description(callback: CallbackQuery, state: FSMContext):
 
@@ -269,6 +278,7 @@ async def awaitng_change_description(callback: CallbackQuery, state: FSMContext)
     await state.update_data(raffel_id=raffel_id)
     await callback.message.edit_text('Скиньте новое фото')
     await state.set_state(RaffelChangeState.raffel_change_photo)
+
 
 
 @admin_router_raffles.message(F.photo, RaffelChangeState.raffel_change_photo)
@@ -308,7 +318,7 @@ async def update_change(message: Message, state: FSMContext):
         await message.answer('Измениения успешны!')
         await state.clear()
         return await get_change_raffel_menu(message, state)
-    
+
 
 
 @admin_router_raffles.callback_query(F.data.startswith('raffel_end_data_id:'))
@@ -341,10 +351,6 @@ async def update_change(message: Message, state: FSMContext):
         await message.answer('Измениения успешны!')
         await state.clear()
         return await get_change_raffel_menu(message, state)
-
-
-
-
 
 
 
