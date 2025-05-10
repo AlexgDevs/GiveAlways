@@ -1,7 +1,8 @@
 from .admin import (admin_router,
                     admin_router_raffles,
                     finished_raffel_router,
-                    work_with_user)
+                    work_with_user,
+                    settings_router)
 
 
 from .user import (user_router,

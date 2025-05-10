@@ -29,7 +29,8 @@ from .handlers import (
     active_raffels_router,
     finished_raffel_router,
     user_raffels,
-    work_with_user
+    work_with_user,
+    settings_router
 )
 
 
@@ -114,7 +115,7 @@ async def add_user_from_db(message: Message, state: FSMContext):
 
 async def main():
     bot = Bot(token=os.getenv('TOKEN'))
-    drop()
+    # drop()
     up()
     
     dp.include_routers(
@@ -125,8 +126,8 @@ async def main():
         active_raffels_router,
         user_raffels,
         finished_raffel_router,
-        work_with_user
-        
+        work_with_user,
+        settings_router
     )
 
 

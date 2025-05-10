@@ -82,6 +82,8 @@ async def get_winner_and_stop_raffel(callback: CallbackQuery, state: FSMContext,
             succsed = 0
             failed = 0
 
+            await callback.message.edit_text(f'Был выбран - @{winner.name}')
+
             try:
 
                 for user_id in user_ids:

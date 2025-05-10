@@ -4,7 +4,6 @@ import json
 
 from sqlalchemy import select
 from aiogram import Bot, Router, F
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
@@ -16,7 +15,7 @@ from aiogram.types import (
     CallbackQuery
 )
 
-from ...keyboards.reply import admin_main_menu
+from ...keyboards.reply import admin_main_menu, raffel_back
 from ...keyboards.inline import condition_buttons
 from ...database import (Session,
                         User,
@@ -33,7 +32,7 @@ admin_router_raffles = Router()
 @admin_router_raffles.message(F.text=='➕ Создать', AdminState.admin_actions)
 async def set_title(message: Message, state: FSMContext):
 
-    await message.answer('Введите название предмета который вы разыгрываете', reply_markup=ReplyKeyboardRemove())
+    await message.answer('Введите название предмета который вы разыгрываете', reply_markup=raffel_back)
     await state.set_state(AdminState.raffles_title)
 
 
@@ -56,7 +55,7 @@ async def get_title_and_set_description(message: Message, state: FSMContext):
 async def get_description_and_get_photo(message: Message, state: FSMContext):
     
     description = message.text
-    if len(description) >= 896:
+    if len(description) >= 800:
         await message.answer('Слишком много букв!')
         return
     
@@ -79,7 +78,9 @@ async def get_photo_and_set_end_data(message: Message, state: FSMContext):
 
 @admin_router_raffles.message(F.text, AdminState.raffles_end_date)
 async def progress_end_data(message: Message, state: FSMContext, bot: Bot):
+
     try:
+
         end_data_str = message.text.strip()
         date_format = "%d.%m.%Y"
         end_data = datetime.strptime(end_data_str, date_format)
@@ -114,13 +115,19 @@ async def update_for_chanel(callback: CallbackQuery, state: FSMContext):
 @admin_router_raffles.message(F.text, AdminState.raffles_requirements)
 async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
 
-    requirements = message.text
-    if requirements.startswith('@'):
-        await message.answer('Канал не может начинаться с @')
-        return
+    try:
+
+        requirements = message.text
+        if requirements.startswith('@'):
+            await message.answer('Канал не может начинаться с @')
+            return
+        
+        requirements_username = requirements.split('/')[-1].replace('@', '').strip()
+        await state.update_data(requirements=requirements_username)
     
-    requirements_username = requirements.split('/')[-1].replace('@', '').strip()
-    await state.update_data(requirements=requirements_username)
+    except ValueError:
+        await message.answer('Неверный ввод!')
+        return
 
     try:
         
@@ -150,14 +157,13 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
                     await state.clear()
                     await state.set_state(AdminState.admin_actions)
 
-                    
 
                     user_ids = session.scalars(select(User.id)).all()
                     succsed = 0
                     failed = 0
 
                     for user_id in user_ids:
-                            
+
                         try:
 
                             await bot.send_photo(
@@ -168,7 +174,7 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
 
                             succsed += 1
                             await asyncio.sleep(0.3)
-                            
+
                         except Exception as e:
                             print('failed', e)
                             failed += 1
@@ -190,6 +196,21 @@ async def get_name_chanel(message: Message, state: FSMContext, bot: Bot):
 @admin_router_raffles.message(F.text=='✏️ Изменить', AdminState.admin_actions)
 async def get_change_raffel_menu(message: Message, state: FSMContext):
 
+    try:
+
+        with Session.begin() as session:
+
+            raffel_ids = session.scalars(select(Giveaway.id)).all()
+
+            if not raffel_ids:
+                await message.answer('У вас нет розыгрышей!')
+                return
+
+    except Exception as e:
+        print(e)
+        await message.answer('Не удалось посмотреть розыгрыш!')
+        return
+
     dicret_menu = ReplyKeyboardBuilder()
     for i in range(1, 5):
         dicret_menu.button(text=f'{i}')
@@ -210,20 +231,27 @@ async def select_change(message: Message, state: FSMContext):
 
     if message.text == '1':
 
-        with Session.begin() as session:
-            raffels_ids = session.scalars(select(Giveaway.id)).all()
+        try:
 
-            if not raffels_ids:
-                await message.answer('Сейчас нет розыгрышей')
-                return
-            
-            for raffel_id in raffels_ids:
-                raffel = session.get(Giveaway, raffel_id)
-                raffels_menu = InlineKeyboardBuilder()
-                raffels_menu.button(text=f'{raffel.title}', callback_data=f'raffel_photo_id:{raffel_id}')
-            
-            raffels_menu = raffels_menu.adjust(3).as_markup()
-            await message.answer('Выберите для какого розыгрыша вы хотите изменить фото', reply_markup=raffels_menu)
+            with Session.begin() as session:
+                raffels_ids = session.scalars(select(Giveaway.id)).all()
+
+                if not raffels_ids:
+                    await message.answer('Сейчас нет розыгрышей')
+                    return
+                
+                for raffel_id in raffels_ids:
+                    raffel = session.get(Giveaway, raffel_id)
+                    raffels_menu = InlineKeyboardBuilder()
+                    raffels_menu.button(text=f'{raffel.title}', callback_data=f'raffel_photo_id:{raffel_id}')
+                
+                raffels_menu = raffels_menu.adjust(3).as_markup()
+                await message.answer('Выберите для какого розыгрыша вы хотите изменить фото', reply_markup=raffels_menu)
+
+        except Exception as e:
+            print(e)
+            await message.answer('Не удалось проверить розыгрышы!')
+            return
 
 
 
@@ -276,7 +304,7 @@ async def awaitng_change_description(callback: CallbackQuery, state: FSMContext)
     await callback.answer()
     raffel_id = callback.data.split(':')[1]
     await state.update_data(raffel_id=raffel_id)
-    await callback.message.edit_text('Скиньте новое фото')
+    await callback.message.edit_text('Пришлите мне новое фото')
     await state.set_state(RaffelChangeState.raffel_change_photo)
 
 
@@ -287,12 +315,21 @@ async def update_change(message: Message, state: FSMContext):
     data = await state.get_data()
     raffel_id = data.get('raffel_id')
 
-    with Session.begin() as session:
-        raffel = session.get(Giveaway, raffel_id)
-        raffel.photo = message.photo[-1].file_id
-        await message.answer('Измениения успешны!')
+    try:
+
+        with Session.begin() as session:
+            raffel = session.get(Giveaway, raffel_id)
+            raffel.photo = message.photo[-1].file_id
+            await message.answer('Измениения успешны!')
+            await state.clear()
+            return await get_change_raffel_menu(message, state)
+    
+    except Exception as e:
+        print(e)
+        await message.answer('Не удалось изменить фото!')
         await state.clear()
         return await get_change_raffel_menu(message, state)
+
 
 
 
@@ -312,10 +349,18 @@ async def update_change(message: Message, state: FSMContext):
     data = await state.get_data()
     raffel_id = data.get('raffel_id')
 
-    with Session.begin() as session:
-        raffel = session.get(Giveaway, raffel_id)
-        raffel.description = message.text
-        await message.answer('Измениения успешны!')
+    try:
+
+        with Session.begin() as session:
+            raffel = session.get(Giveaway, raffel_id)
+            raffel.description = message.text
+            await message.answer('Измениения успешны!')
+            await state.clear()
+            return await get_change_raffel_menu(message, state)
+
+    except Exception as e:
+        print(e)
+        await message.answer('Не удалось изменит описание!')
         await state.clear()
         return await get_change_raffel_menu(message, state)
 
@@ -331,53 +376,74 @@ async def awaitng_change_description(callback: CallbackQuery, state: FSMContext)
     await state.set_state(RaffelChangeState.raffel_change_end_data)
 
 
+
 @admin_router_raffles.message(F.text, RaffelChangeState.raffel_change_end_data)
 async def update_change(message: Message, state: FSMContext):
 
     data = await state.get_data()
     raffel_id = data.get('raffel_id')
 
-    end_data_str = message.text.strip()
-    date_format = "%d.%m.%Y"
-    end_data = datetime.strptime(end_data_str, date_format)
+    try:
 
-    if end_data <= datetime.now():
-        await message.answer('Дата не может быть в прошлом!')
+        end_data_str = message.text.strip()
+        date_format = "%d.%m.%Y"
+        end_data = datetime.strptime(end_data_str, date_format)
+
+        if end_data <= datetime.now():
+            await message.answer('Дата не может быть в прошлом!')
+            return
+
+        try:
+
+            with Session.begin() as session:
+                raffel = session.get(Giveaway, raffel_id)
+                raffel.end_data = end_data
+                await message.answer('Измениения успешны!')
+                await state.clear()
+                return await get_change_raffel_menu(message, state)
+
+        except Exception as e:
+            await message.answer('Не удалось добавить дату')
+            await state.clear()
+            return await get_change_raffel_menu(message, state)
+
+    except ValueError:
+        await message.answer('Неверный ввод!')
         return
-
-    with Session.begin() as session:
-        raffel = session.get(Giveaway, raffel_id)
-        raffel.end_data = end_data
-        await message.answer('Измениения успешны!')
-        await state.clear()
-        return await get_change_raffel_menu(message, state)
 
 
 
 @admin_router_raffles.message(F.text=='📋 Список', AdminState.admin_actions)
 async def get_list_active_raffels(message: Message, state: FSMContext, bot: Bot):
 
-    with Session.begin() as session:
-        raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data>datetime.now())).all()
-        user_id = message.from_user.id
+    try:
 
-        if not raffels_ids:
-            await message.answer('Сейчас нет активных розыгрышей')
-            return
-        
-        total = 0
+        with Session.begin() as session:
+            raffels_ids = session.scalars(select(Giveaway.id).filter(Giveaway.end_data>datetime.now())).all()
+            user_id = message.from_user.id
 
-        for raffel_id in raffels_ids:
-            total += 1
+            if not raffels_ids:
+                await message.answer('Сейчас нет активных розыгрышей')
+                return
+            
+            total = 0
 
-            raffel = session.get(Giveaway, raffel_id)
-            await bot.send_photo(
-                chat_id=user_id,
-                photo=raffel.photo,
-                caption=f'{raffel.title}\n\n{raffel.description}\n\nСписок участников - {raffel.user_total}\n\nДата окончания - {raffel.end_data}'
-            )
+            for raffel_id in raffels_ids:
+                total += 1
 
-        await message.answer(f'Всего - {total} розыгрышей!')
+                raffel = session.get(Giveaway, raffel_id)
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=raffel.photo,
+                    caption=f'{raffel.title}\n\n{raffel.description}\n\nСписок участников - {raffel.user_total}\n\nДата окончания - {raffel.end_data}'
+                )
+
+            await message.answer(f'Всего - {total} розыгрышей!')
+    
+    except Exception as e:
+        print(e)
+        await message.answer('Не удалось посмотреть список розыгрышей!')
+        return
 
 
 

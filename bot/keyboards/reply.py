@@ -20,6 +20,12 @@ raffles_menu.button(text='⬅️ Назад') #.
 raffles_menu.adjust(2, 2, 1)
 raffles_menu = raffles_menu.as_markup(resize_keyboard=True)
 
+
+# create
+raffel_back = ReplyKeyboardBuilder()
+raffel_back.button(text='Отменить создание')
+raffel_back = raffel_back.as_markup(resize_keyboard=True)
+
 # Меню пользователей
 users_menu = ReplyKeyboardBuilder()
 users_menu.button(text='⛔ Заблокировать') #. 
@@ -40,8 +46,7 @@ stats_menu = stats_menu.as_markup(resize_keyboard=True)
 
 # Меню настроек
 settings_menu = ReplyKeyboardBuilder()
-settings_menu.button(text='📝 Условия') 
-settings_menu.button(text='📢 Рассылка')
+settings_menu.button(text='📢 Рассылка') #.
 settings_menu.button(text='⚙️ Параметры')
 settings_menu.button(text='⬅️ Назад') #.
 settings_menu.adjust(2, 2)

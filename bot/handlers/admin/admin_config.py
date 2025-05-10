@@ -61,3 +61,16 @@ async def get_keyboard_static(message: Message, state: FSMContext):
 async def get_back_menu(message: Message, state: FSMContext):
 
     await message.answer('Вы вернулись в главное меню', reply_markup=admin_main_menu)
+
+
+@admin_router.message(F.text=='Отменить создание')
+async def back_to_admin_menu(message: Message, state: FSMContext):
+    
+    user_id = message.from_user.id
+    if user_id not in ADMIN_IDS:
+        return False
+
+    else:
+        await message.answer('Вы отменили создание', reply_markup=admin_main_menu)
+        await state.clear()
+        await state.set_state(AdminState.admin_actions)

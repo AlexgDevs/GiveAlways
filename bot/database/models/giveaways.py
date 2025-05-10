@@ -17,7 +17,7 @@ class Giveaway(Base):
     title: Mapped[str] = mapped_column(String(256))
     description: Mapped[str] = mapped_column(String(2000))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    photo: Mapped[str] = mapped_column(String(2000))
+    photo: Mapped[str] = mapped_column(String(800))
     end_data: Mapped[datetime] = mapped_column(DateTime)
     requirements: Mapped[str]
     user_total: Mapped[int] = mapped_column(default=0)

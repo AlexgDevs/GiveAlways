@@ -3,6 +3,7 @@ from aiogram.fsm.state import State, StatesGroup
 
 class AdminState(StatesGroup):
     admin_actions = State()
+    ping_text = State()
 
     raffles_title = State()
     raffles_description = State()
