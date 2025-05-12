@@ -291,7 +291,10 @@ async def select_change(message: Message, state: FSMContext):
             await message.answer('Выберите для какого розыгрыша вы хотите изменить окончание даты', reply_markup=raffels_menu)
 
     elif message.text == '4':
+
         await message.answer('Вы вернулись в админ меню', reply_markup=admin_main_menu)
+        await state.clear()
+        await state.set_state(AdminState.admin_actions)
 
     else:
         await message.answer('Нет такого ответа!')
@@ -432,11 +435,13 @@ async def get_list_active_raffels(message: Message, state: FSMContext, bot: Bot)
                 total += 1
 
                 raffel = session.get(Giveaway, raffel_id)
-                await bot.send_photo(
-                    chat_id=user_id,
-                    photo=raffel.photo,
-                    caption=f'{raffel.title}\n\n{raffel.description}\n\nСписок участников - {raffel.user_total}\n\nДата окончания - {raffel.end_data}'
-                )
+                if raffel:
+
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=raffel.photo,
+                        caption=f'{raffel.title}\n\n{raffel.description}\n\nСписок участников - {raffel.user_total}\n\nДата окончания - {raffel.end_data}'
+                    )
 
             await message.answer(f'Всего - {total} розыгрышей!')
     

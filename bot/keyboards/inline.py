@@ -1,6 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-
 builder = InlineKeyboardBuilder()
 builder.button(text="Подписка на канал", callback_data="req_subscribe")
 builder.button(text="Репост записи", callback_data="req_repost") #pass

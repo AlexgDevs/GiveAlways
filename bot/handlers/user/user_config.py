@@ -32,4 +32,8 @@ async def get_rules(message: Message, state: FSMContext):
     await message.answer(rules_text, parse_mode="HTML")
 
 
+@user_router.message(F.text=='🛟 Поддержка', UserState.user_actions)
+async def get_support(message: Message, state: FSMContext):
+
+    await message.answer('<b>Вы можете связаться с нашим админом @TakeGuna.\n Не стесняйтесь задавать вопросы!</b>', parse_mode="HTML")
 

@@ -12,11 +12,11 @@ from ...keyboards.reply import (admin_main_menu,
                                 raffles_menu,
                                 users_menu,
                                 settings_menu,
-                                stats_menu)
+                                )
 
 admin_router = Router()
 
-ADMIN_IDS = [1169844663]
+ADMIN_IDS = [1169844663, 941990323, 6121706945]
 
 @admin_router.message(Command('admin'))
 async def chek_admin(message: Message, state: FSMContext):
@@ -46,11 +46,6 @@ async def get_keyboard_raffiels(message: Message, state: FSMContext):
 async def get_keyboard_users(message: Message, state: FSMContext):
 
     await message.answer('Вы вошли в раздел пользователи', reply_markup=users_menu)
-
-@admin_router.message(F.text=='📊 Статистика', AdminState.admin_actions)
-async def get_keyboard_static(message: Message, state: FSMContext):
-
-    await message.answer('Вы вошли в раздел статистики', reply_markup=stats_menu)
 
 @admin_router.message(F.text=='⚙️ Настройки', AdminState.admin_actions)
 async def get_keyboard_static(message: Message, state: FSMContext):

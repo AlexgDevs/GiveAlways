@@ -37,12 +37,15 @@ async def get_list_raffels(message: Message, state: FSMContext, bot: Bot):
             for raffel_id in raffels_ids:
                 raffel = session.get(Giveaway, raffel_id)
                 if raffel:
+
                     participate_button = InlineKeyboardBuilder()
                     await bot.send_photo(
+
                                     chat_id=user_id,
                                     photo=raffel.photo,
                                     caption=f'розыгрыш!\n\n{raffel.title}\n\n{raffel.description}\n\nДата окончание розыгрыша в {raffel.end_data}\nУспей поучаствовать!',
                                     reply_markup=participate_button.button(text='Участвовать', callback_data=f'participate_action:{raffel.id}').adjust(1).as_markup()
+                                
                                 )
                     asyncio.sleep(0.3)
                 else:
@@ -62,6 +65,7 @@ async def chek_condition(callback: CallbackQuery):
     raffels_id = callback.data.split(':')[1]
     
     with Session.begin() as session:
+
         raffel = session.get(Giveaway, raffels_id)
         if raffel:
             
@@ -80,6 +84,7 @@ async def get_channel_id(bot: Bot, channel_username: str) -> int:
     return chat.id
 
 
+
 @active_raffels_router.callback_query(F.data.startswith('check_condition:'))
 async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
@@ -91,11 +96,10 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
     with Session.begin() as session:
         
-
         existing = session.scalar(select(Participation).filter(Participation.user_id==user_id, Participation.giveaway_id==raffel_id))
-
         if existing:
             if existing.channel_checked:
+
                 await callback.message.answer('Вы уже участвуйте в розыгрыше!')
                 return
 
@@ -110,7 +114,6 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
 
         try:
         
-
             user = session.get(User, user_id)
             raffel = session.get(Giveaway, raffel_id)
             
@@ -128,7 +131,7 @@ async def check_condition(callback: CallbackQuery, state: FSMContext, bot: Bot):
         except Exception as e:
             await callback.message.answer('Не удалось принять участие')
             return
-    
+
 
 
 @active_raffels_router.message(F.text=='🎯 Мое участие', UserState.user_actions)

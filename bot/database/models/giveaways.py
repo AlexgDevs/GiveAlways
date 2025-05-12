@@ -14,10 +14,10 @@ class Giveaway(Base):
     __tablename__ = 'giveaways'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(256))
-    description: Mapped[str] = mapped_column(String(2000))
+    title: Mapped[str] = mapped_column(String(124))
+    description: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    photo: Mapped[str] = mapped_column(String(800))
+    photo: Mapped[str] = mapped_column(String(600))
     end_data: Mapped[datetime] = mapped_column(DateTime)
     requirements: Mapped[str]
     user_total: Mapped[int] = mapped_column(default=0)
